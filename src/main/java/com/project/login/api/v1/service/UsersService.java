@@ -25,6 +25,9 @@ import org.springframework.util.ObjectUtils;
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
+
 @Slf4j
 @RequiredArgsConstructor
 @Service
@@ -45,7 +48,7 @@ public class UsersService {
         Users user = Users.builder()
                 .email(signUp.getEmail())
                 .password(passwordEncoder.encode(signUp.getPassword()))
-                .roles(Collections.singletonList(Authority.ROLE_USER.name()))
+                .roles(Collections.singleton(Authority.ROLE_USER.name()))
                 .build();
         usersRepository.save(user);
 
@@ -70,8 +73,7 @@ public class UsersService {
         UserResponseDto.TokenInfo tokenInfo = jwtTokenProvider.generateToken(authentication);
 
         // 4. RefreshToken Redis 저장 (expirationTime 설정을 통해 자동 삭제 처리)
-        redisTemplate.opsForValue()
-                .set("RT:" + authentication.getName(), tokenInfo.getRefreshToken(), tokenInfo.getRefreshTokenExpirationTime(), TimeUnit.MILLISECONDS);
+        redisTemplate.opsForValue().set("RT:" + authentication.getName(), tokenInfo.getRefreshToken(), tokenInfo.getRefreshTokenExpirationTime(), TimeUnit.MILLISECONDS);
 
         return response.success(tokenInfo, "로그인에 성공했습니다.", HttpStatus.OK);
     }
@@ -99,8 +101,7 @@ public class UsersService {
         UserResponseDto.TokenInfo tokenInfo = jwtTokenProvider.generateToken(authentication);
 
         // 5. RefreshToken Redis 업데이트
-        redisTemplate.opsForValue()
-                .set("RT:" + authentication.getName(), tokenInfo.getRefreshToken(), tokenInfo.getRefreshTokenExpirationTime(), TimeUnit.MILLISECONDS);
+        redisTemplate.opsForValue().set("RT:" + authentication.getName(), tokenInfo.getRefreshToken(), tokenInfo.getRefreshTokenExpirationTime(), TimeUnit.MILLISECONDS);
 
         return response.success(tokenInfo, "Token 정보가 갱신되었습니다.", HttpStatus.OK);
     }
@@ -122,18 +123,17 @@ public class UsersService {
 
         // 4. 해당 Access Token 유효시간 가지고 와서 BlackList 로 저장하기
         Long expiration = jwtTokenProvider.getExpiration(logout.getAccessToken());
-        redisTemplate.opsForValue()
-                .set(logout.getAccessToken(), "logout", expiration, TimeUnit.MILLISECONDS);
+        redisTemplate.opsForValue().set(logout.getAccessToken(), "logout", expiration, TimeUnit.MILLISECONDS);
 
         return response.success("로그아웃 되었습니다.");
     }
 
     public ResponseEntity<?> authority() {
-        // SecurityContext에 담겨 있는 authentication userEamil 정보
+        // SecurityContext 에 담겨 있는 authentication userEmail 정보
         String userEmail = SecurityUtil.getCurrentUserEmail();
+        log.info(">>> userEmail : {}", userEmail);
 
-        Users user = usersRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new UsernameNotFoundException("No authentication information."));
+        Users user = usersRepository.findByEmail(userEmail).orElseThrow(() -> new UsernameNotFoundException("No authentication information."));
 
         // add ROLE_ADMIN
         user.getRoles().add(Authority.ROLE_ADMIN.name());

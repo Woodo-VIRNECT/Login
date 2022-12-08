@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.Errors;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -64,9 +65,10 @@ public class UsersController {
         return usersService.logout(logout);
     }
 
-    @GetMapping("/authority")
-    public ResponseEntity<?> authority() {
+    @GetMapping("/authority/addAdminRole")
+    public ResponseEntity<?> authority(HttpServletRequest request) {
         log.info("ADD ROLE_ADMIN");
+
         return usersService.authority();
     }
 
