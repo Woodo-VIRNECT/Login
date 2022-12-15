@@ -31,11 +31,11 @@ public class Users extends BaseTime implements UserDetails {
 
     @Column
     private String password;
-
     @Column
     @ElementCollection(fetch = FetchType.EAGER)
     @Builder.Default
     private Set<String> roles = new HashSet<>();
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

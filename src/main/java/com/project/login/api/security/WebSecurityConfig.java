@@ -30,7 +30,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS) // stateless : session 을 사용하지 않고 stateless 상태인 JWT 를 사용하여 spring security 와 연동
                 .and()
                 .authorizeRequests()
-                .antMatchers("/api/v1/users/sign-up", "/api/v1/users/login", "/api/v1/users/authority/addAdminRole", "/api/v1/users/reissue", "/api/v1/users/logout").permitAll()
+                .antMatchers("/api/v1/users/sign-up", "/api/v1/users/login", "/api/v1/users/authority/addAdminRole", "/api/v1/users/reissue", "/api/v1/users/logout", "/api/v1/users/sendMail").permitAll()
                 .antMatchers("/api/v1/users/userTest").hasRole("USER")
                 .antMatchers("/api/v1/users/adminTest").hasRole("ADMIN")
                 .and()
